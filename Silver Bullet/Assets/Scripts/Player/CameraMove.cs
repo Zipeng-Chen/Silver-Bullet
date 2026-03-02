@@ -7,7 +7,5 @@ public class CameraMove : MonoBehaviour
     private void Update()
     {
         transform.position = cameraTarget.position;
-        print("cam: " + cameraTarget.position);
-        print("me: " + transform.position);
     }
 }
