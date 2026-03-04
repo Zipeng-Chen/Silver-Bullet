@@ -13,6 +13,17 @@ public class RoomObject : MonoBehaviour
     // Number of rooms between this and the starting room
     [HideInInspector] public int distanceFromCenter;
 
+    private void Awake()
+    {
+        if (!isConnector)
+        {
+            for (int i = 0; i < Random.Range(0, 4); i++)
+            {
+                rotateRoom();
+            }
+        }
+    }
+
     // Rotates the room 90 degrees clockwise
     public void rotateRoom()
     {
