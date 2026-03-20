@@ -71,7 +71,6 @@ public class CreateDungeon : MonoBehaviour
     [SerializeField] private int[] tieredMatValues;
     [SerializeField] private ColouredMats[] tieredMaterials;
 
-
     [Header("Enemy Settings")]
     [Tooltip("Length of a chain from the center before enemies start spawning.")]
     [SerializeField] private int enemySpawnDistance;
@@ -84,6 +83,9 @@ public class CreateDungeon : MonoBehaviour
     [Header("Special Rooms")]
     [SerializeField] private GameObject endingRoom;
     [SerializeField] private GameObject deadEndRoom;
+    [SerializeField] private GameObject key;
+    [Tooltip("For each key, add the distance (in percentage) that you want the key to spawn at")]
+    [SerializeField] private float[] keyDistances;
 
     [Header("Connector Settings")]
     [SerializeField] private GameObject[] connectors;
@@ -95,8 +97,10 @@ public class CreateDungeon : MonoBehaviour
     private Fringe<GameObject> toPlace;
     private GameObject roomParent;
     private GameObject enemyParent;
+    private GameObject keyParent;
 
     private int numRoomsPlaced = 0;
+    private List<RoomObject> placedRooms = new List<RoomObject>();
     private bool endingRoomPlaced = false;
 
     private int maxRetries = 50;
@@ -132,6 +136,9 @@ public class CreateDungeon : MonoBehaviour
         toPlace = placementOrder == PlacementOrder.Stack ? new StackFringe<GameObject>() : new QueueFringe<GameObject>();
 
         DestroyImmediate(roomParent);
+        DestroyImmediate(enemyParent);
+        DestroyImmediate(keyParent);
+        placedRooms.Clear();
         numRoomsPlaced = 0;
         endingRoomPlaced = false;
 
@@ -143,6 +150,7 @@ public class CreateDungeon : MonoBehaviour
     {
         roomParent = new GameObject("Rooms");
         enemyParent = new GameObject("Enemies");
+        keyParent = new GameObject("Keys");
 
         map = new bool[dungeonSize, dungeonSize];
         map[dungeonSize / 2, dungeonSize / 2] = true; // Initial room will always be at the center
@@ -175,6 +183,8 @@ public class CreateDungeon : MonoBehaviour
         {
             Debug.LogError("Failed to place ending room. Change settings");
         }
+
+        placeKeys();
     }
 
 
@@ -184,14 +194,18 @@ public class CreateDungeon : MonoBehaviour
         {
             DestroyImmediate(roomParent);
             DestroyImmediate(enemyParent);
+            DestroyImmediate(keyParent);
         }
         else
         {
             Destroy(roomParent);
             Destroy(enemyParent);
+            Destroy(keyParent);
         }
+        placedRooms.Clear();
         roomParent = new GameObject("Rooms");
         enemyParent = new GameObject("Enemies");
+        keyParent = new GameObject("Keys");
         map = new bool[dungeonSize, dungeonSize];
         map[dungeonSize / 2, dungeonSize / 2] = true;
         numRoomsPlaced = 0;
@@ -317,6 +331,79 @@ public class CreateDungeon : MonoBehaviour
             }
         }
 
+        placedRooms.Add(newRoomData);
         toPlace.Add(newRoom);
+    }
+
+    private void placeKeys()
+    {
+        List<RoomObject> possiblePlacements = new List<RoomObject>();
+
+        foreach (RoomObject room in placedRooms) // Filter out invalid rooms
+        {
+            if (room.isConnector || room.gameObject == endingRoom || room.distanceFromCenter <= 1)
+            {
+                continue;
+            }
+
+            possiblePlacements.Add(room);
+        }
+
+        if (possiblePlacements.Count < 3)
+        {
+            Debug.LogError("Cannot place keys, need more valid rooms");
+            return;
+        }
+
+        // Get furthest room distance
+        int maxDist = 0;
+        foreach (RoomObject room in possiblePlacements)
+        {
+            if (room.distanceFromCenter > maxDist)
+            {
+                maxDist = room.distanceFromCenter;
+            }
+        }
+
+        // First key placed close, third key placed far
+        List<RoomObject> firstArea = possiblePlacements.FindAll(room => room.distanceFromCenter >= maxDist * keyDistances[0] && room.distanceFromCenter <= maxDist * keyDistances[1]);
+        List<RoomObject> secondArea = possiblePlacements.FindAll(room => room.distanceFromCenter >= maxDist * keyDistances[1] && room.distanceFromCenter <= maxDist * keyDistances[2]);
+        List<RoomObject> thirdArea = possiblePlacements.FindAll(room => room.distanceFromCenter >= maxDist * keyDistances[2] && room.distanceFromCenter <= maxDist * 0.95f);
+
+        RoomObject firstKeyLoc = firstArea[UnityEngine.Random.Range(0, firstArea.Count)];
+        RoomObject secondKeyLoc = chooseFurthestFrom(secondArea, new List<RoomObject> { firstKeyLoc });
+        RoomObject thirdKeyLoc = chooseFurthestFrom(thirdArea, new List<RoomObject> { firstKeyLoc, secondKeyLoc });
+
+        Instantiate(key, firstKeyLoc.transform.position, Quaternion.identity, keyParent.transform);
+        Instantiate(key, secondKeyLoc.transform.position, Quaternion.identity, keyParent.transform);
+        Instantiate(key, thirdKeyLoc.transform.position, Quaternion.identity, keyParent.transform);
+    }
+
+    private RoomObject chooseFurthestFrom(List<RoomObject> rooms, List<RoomObject> chosen)
+    {
+        RoomObject bestRoom = null;
+        float best = -1f;
+
+        foreach (RoomObject room in rooms)
+        {
+            float minDist = float.MaxValue;
+
+            foreach (RoomObject c in chosen)
+            {
+                float dist = Vector3.Distance(room.transform.position, c.transform.position);
+                if (dist < minDist)
+                {
+                    minDist = dist;
+                }
+            }
+
+            if (minDist > best)
+            {
+                best = minDist;
+                bestRoom = room;
+            }
+        }
+
+        return bestRoom;
     }
 }
