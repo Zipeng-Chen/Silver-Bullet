@@ -12,7 +12,7 @@ public class RoomObject : MonoBehaviour
     [HideInInspector] public int z;
 
     // Number of rooms between this and the starting room
-    [HideInInspector] public int distanceFromCenter;
+    public int distanceFromCenter;
 
     private void Awake()
     {

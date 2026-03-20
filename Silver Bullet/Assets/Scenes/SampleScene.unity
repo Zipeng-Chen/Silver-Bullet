@@ -1207,7 +1207,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24d4b2fd74d9ce54eb1fe64f0eb6e12e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CreateDungeon
-  dungeonSize: 99
+  dungeonSize: 31
   decayIncrements:
   - upperIndex: 5
     lowerIndex: 5
@@ -1225,7 +1225,7 @@ MonoBehaviour:
     lowerIndex: 0
     decayAt: 400
   placementOrder: 1
-  lengthOfDungeon: 30
+  lengthOfDungeon: 20
   dungeonStartingPoint: {fileID: 7043214083554906761}
   rooms:
   - {fileID: 7043214082352581844, guid: 47c4191ce39a6854eb5783c43149547b, type: 3}
@@ -1250,6 +1250,11 @@ MonoBehaviour:
   enemy: {fileID: 8668158434612242911, guid: f6992ec2d5371bf40a3967a9a77b8e2d, type: 3}
   endingRoom: {fileID: 7043214082352581844, guid: 514b6dcb1a92cb84eae8d2f651f3b4ee, type: 3}
   deadEndRoom: {fileID: 7043214082352581844, guid: 47c4191ce39a6854eb5783c43149547b, type: 3}
+  key: {fileID: 12601365435904956, guid: 1a2ab19836f9f6b4e85a299cd1467223, type: 3}
+  keyDistances:
+  - 0.25
+  - 0.5
+  - 0.75
   connectors:
   - {fileID: 3569318981793247024, guid: 7ac05cdf7b8bd36499531e5161df4dd4, type: 3}
   generateOnStart: 1
@@ -2609,8 +2614,8 @@ MonoBehaviour:
   directions: 00010000
   isConnector: 0
   isStartingRoom: 1
-  x: 0
-  z: 0
+  x: 15
+  z: 15
   distanceFromCenter: 0
 --- !u!65 &5824332409075581004
 BoxCollider:
@@ -2930,6 +2935,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 1516099663}
   - {fileID: 408848765}
-  - {fileID: 542787557}
   - {fileID: 1205261183}
   - {fileID: 1764596032}
+  - {fileID: 542787557}
