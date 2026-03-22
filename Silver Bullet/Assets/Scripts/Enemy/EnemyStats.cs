@@ -5,10 +5,11 @@ public class EnemyStats : MonoBehaviour
     [SerializeField] private Material armoured;
     [SerializeField] private Material notArmoured;
 
-    private bool isArmoured = true;
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip armourHitClip;
+    [SerializeField] private AudioClip unarmouredHitClip;
 
-    public AudioSource armourHit;
-    public AudioSource unarmouredHit;
+    private bool isArmoured = true;
 
     public bool getArmoured()
     {
@@ -21,16 +22,15 @@ public class EnemyStats : MonoBehaviour
         {
             isArmoured = false;
             GetComponentInChildren<MeshRenderer>().material = notArmoured;
-            armourHit.Play();
-            Debug.Log("armour hit");
-;
+
+            if (audioSource != null && armourHitClip != null)
+                audioSource.PlayOneShot(armourHitClip);
         }
         else
         {
-            unarmouredHit.Play();
+            if (audioSource != null && unarmouredHitClip != null)
+                audioSource.PlayOneShot(unarmouredHitClip);
             Destroy(gameObject);
-            Debug.Log("enemy killed");
-
         }
     }
 }
